@@ -10,8 +10,4 @@ if not os.path.exists('output'):
 
 model = YOLO('yolov8m.pt')
 
-results = model('data/image.jpg')
-
-for result in results:
-    result.show()
-    result.save('output/output.jpg')
+model.predict(source=0, show=True)
