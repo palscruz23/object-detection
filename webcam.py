@@ -8,6 +8,12 @@ if not os.path.exists('data'):
 if not os.path.exists('output'):
     os.mkdir('output')
 
-model = YOLO('yolov8m.pt')
+model = YOLO('yolov8n.pt')
 
-model.predict(source=0, show=True)
+model.predict(source=0, 
+              show=True,
+              save=True,
+              project='output',
+              name='cam',
+              exist_ok=True,
+              )
