@@ -2,6 +2,8 @@ from ultralytics import YOLO
 import cv2
 import os
 import time
+import queue
+import threading
 
 # Add folders if does not exist
 if not os.path.exists('data'):
@@ -13,23 +15,56 @@ model = YOLO('yolov8n.pt')
 
 phone_url = 'https://192.168.20.19:8080/video'
 
-cap = cv2.VideoCapture(phone_url)
-cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+# Frame queue for buffering
+frame_queue = queue.Queue(maxsize=2)  # Keep only 2 frames
 
-if not cap.isOpened():
-    print("Failed to connect to phone!")
-    exit()
+def capture_frames(url, frame_queue):
+    """Separate thread to capture frames"""
+    cap = cv2.VideoCapture(url)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Minimize buffer
+    
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        
+        # Clear old frames and add new one
+        if frame_queue.full():
+            try:
+                frame_queue.get_nowait()  # Remove old frame
+            except queue.Empty:
+                pass
+        
+        frame_queue.put(frame)
+    
+    cap.release()
 
-print("Connected to phone app!")
-print("Press q to quit")
+# Start capture thread
+capture_thread = threading.Thread(target=capture_frames, args=(phone_url, frame_queue))
+capture_thread.daemon = True
+capture_thread.start()
 
-rot=1
+print("Connecting to phone camera...")
+time.sleep(2)  # Give thread time to start
+
+print("Connected! Press 'q' to quit")
+
+cv2.namedWindow('YOLO phone camera', cv2.WINDOW_NORMAL)
+cv2.resizeWindow('YOLO phone camera', 600, 800)
+
+# Rotation setting
+rotation_angle = 90  # Change this: 0, 90, 180, or 270
+
 fps_list = []
+rot=1
 while True:
     start_time = time.time()
-    ret, frame = cap.read()
-    if not ret:
-        break
+    
+    try:
+        frame = frame_queue.get(timeout=1)
+    except queue.Empty:
+        print("No frames received")
+        continue
     
     if rot == 1:
         frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)    
