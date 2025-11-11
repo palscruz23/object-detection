@@ -51,8 +51,6 @@ time.sleep(2)  # Give thread time to start
 
 print("Connected! Press 'q' to quit")
 
-
-
 # Rotation setting
 rotation_angle = 90  # Change this: 0, 90, 180, or 270
 
@@ -60,11 +58,24 @@ fps_list = []
 rot=1
 
 # Save stream
-output_filename = f'output/phone/recording_{int(time.time())}.avi'
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
+output_filename = f'output/phone/recording_{int(time.time())}.mp4'
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 fps_recording = 20
-frame_width = 600
-frame_height = 800
+
+# # Get first frame to determine size
+# print("Getting frame dimensions...")
+# first_frame = frame_queue.get(timeout=5)
+
+# if rot == 1:
+#     first_frame = cv2.rotate(first_frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+
+# results = model(first_frame, conf=0.5, verbose=False)
+# annotated_first = results[0].plot()
+# frame_height, frame_width = annotated_first.shape[:2]
+
+# print(f"Frame dimensions: {frame_width}x{frame_height}")
+
+frame_width, frame_height = 480, 720
 out = cv2.VideoWriter(output_filename, fourcc, fps_recording, (frame_width, frame_height))
 
 print(f'Recording to: {output_filename}')
@@ -82,7 +93,7 @@ while True:
         continue
     
     if rot == 1:
-        frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)    
+        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)    
     results = model(frame, conf=0.5)
     annotated_frame = results[0].plot()
 
@@ -99,7 +110,7 @@ while True:
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-
+time.sleep(0.5)
 out.release()
 cv2.destroyAllWindows()
 
