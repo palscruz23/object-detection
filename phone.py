@@ -62,27 +62,27 @@ output_filename = f'output/phone/recording_{int(time.time())}.mp4'
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 fps_recording = 20
 
-# # Get first frame to determine size
-# print("Getting frame dimensions...")
-# first_frame = frame_queue.get(timeout=5)
+# Get first frame to determine size
+print("Getting frame dimensions...")
+first_frame = frame_queue.get(timeout=5)
 
-# if rot == 1:
-#     first_frame = cv2.rotate(first_frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+if rot == 1:
+    first_frame = cv2.rotate(first_frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
-# results = model(first_frame, conf=0.5, verbose=False)
-# annotated_first = results[0].plot()
-# frame_height, frame_width = annotated_first.shape[:2]
+results = model(first_frame, conf=0.5, verbose=False)
+annotated_first = results[0].plot()
+frame_height, frame_width = annotated_first.shape[:2]
 
-# print(f"Frame dimensions: {frame_width}x{frame_height}")
+print(f"Frame dimensions: {frame_width}x{frame_height}")
 
-frame_width, frame_height = 480, 720
+# frame_width, frame_height = 480, 720
 out = cv2.VideoWriter(output_filename, fourcc, fps_recording, (frame_width, frame_height))
 
 print(f'Recording to: {output_filename}')
 
 cv2.namedWindow('YOLO phone camera', cv2.WINDOW_NORMAL)
 cv2.resizeWindow('YOLO phone camera', frame_width, frame_height)
-
+time.sleep(0.1)
 while True:
     start_time = time.time()
     
@@ -94,7 +94,7 @@ while True:
     
     if rot == 1:
         frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)    
-    results = model(frame, conf=0.5)
+    results = model(frame, conf=0.5, verbose=True)
     annotated_frame = results[0].plot()
 
     out.write(annotated_frame)
@@ -110,7 +110,7 @@ while True:
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-time.sleep(0.5)
+time.sleep(0.1)
 out.release()
 cv2.destroyAllWindows()
 
