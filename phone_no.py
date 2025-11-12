@@ -36,7 +36,7 @@ print("Getting frame dimensions...")
 ret, first_frame = cap.read()
 
 if rot == 1:
-    first_frame = cv2.rotate(first_frame, cv2.ROTATE_90_CLOCKWISE)
+    first_frame = cv2.rotate(first_frame, cv2.ROTATE_180)
 
 results = model(first_frame, conf=0.5, verbose=False)
 annotated_first = results[0].plot()
@@ -57,7 +57,7 @@ while True:
     if not ret:
         break
     if rot == 1:
-        frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)  
+        frame = cv2.rotate(frame, cv2.ROTATE_180)  
     results = model(frame, conf=0.5, verbose=True)
     annotated_frame = results[0].plot()
     out.write(annotated_frame)
@@ -71,7 +71,11 @@ while True:
                 (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.imshow("YOLO phone camera", annotated_frame)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    key = cv2.waitKey(1) & 0xFF
+    
+    # Check for 'q' or 'Q' or ESC (27)
+    if key == ord('q') or key == ord('Q') or key == 27:
+        print("Quit key pressed! Stopping...")
         break
 
 time.sleep(0.1)

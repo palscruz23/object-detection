@@ -27,7 +27,7 @@ fps_list = []
 rot=1
 
 # Save stream
-output_filename = f'output/phone/recording_{int(time.time())}.mp4'
+output_filename = f'output/webcam/recording_{int(time.time())}.mp4'
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 fps_recording = 20
 
