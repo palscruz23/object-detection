@@ -21,7 +21,7 @@ dataset = foz.load_zoo_dataset(
             "Human hair",
             "Human mouth",
             "Human nose"],
-    max_samples = 1000
+    max_samples = 10
 )
 
 dataset.export(
@@ -30,22 +30,22 @@ dataset.export(
     label_field = "detections"
 )
 
-# dataset = foz.load_zoo_dataset(
-#     "open-images-v7",
-#     split = "val",
-#     label_types = ["detections"],
-#     classes = ["Human beard",
-#             "Human ear",
-#             "Human eye",
-#             "Human face",
-#             "Human hair",
-#             "Human mouth",
-#             "Human nose"],
-#     max_samples = 200
-# )
+dataset = foz.load_zoo_dataset(
+    "open-images-v7",
+    split = "val",
+    label_types = ["detections"],
+    classes = ["Human beard",
+            "Human ear",
+            "Human eye",
+            "Human face",
+            "Human hair",
+            "Human mouth",
+            "Human nose"],
+    max_samples = 2
+)
 
-# dataset.export(
-#     export_dir = "oiv7_yolo_subset",
-#     dataset_type = fo.types.YOLOv5Dataset,
-#     label_field = "detections"
-# )
+dataset.export(
+    export_dir = str(export_path.absolute()),
+    dataset_type = fo.types.YOLOv5Dataset,
+    label_field = "detections"
+)
