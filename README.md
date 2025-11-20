@@ -28,7 +28,7 @@ yolo-experiment/
 The repository includes several pre-trained YOLO model weights:
 
 **Object Detection Models:**
-- `yolov8n.pt` - YOLOv8 Nano (fastest, smallest)
+- `yolov8n.pt` - YOLOv8 Nano 
 - `yolov8m.pt` - YOLOv8 Medium
 - `yolov8l.pt` - YOLOv8 Large
 - `yolo12n.pt` - YOLO12 Nano
