@@ -1,4 +1,4 @@
-# YOLO Experiments
+# YOLO Experiment
 
 A collection of Python scripts for experimenting with YOLO (You Only Look Once) models for various computer vision tasks including object detection and pose estimation.
 
