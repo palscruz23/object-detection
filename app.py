@@ -1,6 +1,5 @@
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration
 import av
-import cv2
 import threading
 from ultralytics import YOLO
 
