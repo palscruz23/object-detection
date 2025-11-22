@@ -5,3 +5,4 @@ fiftyone
 streamlit
 streamlit-webrtc
 av
+pyngrok
