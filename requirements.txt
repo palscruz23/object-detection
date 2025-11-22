@@ -1,4 +1,7 @@
-ultralytics 
+ultralytics
 opencv-python
 pillow
 fiftyone
+streamlit
+streamlit-webrtc
+av
