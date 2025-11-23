@@ -1,11 +1,12 @@
 ---
-title: YOLO Live Object Detection
+title: YOLO Object Detection
 emoji: 🎯
 colorFrom: blue
-colorTo: red
-sdk: docker
+colorTo: green
+sdk: gradio
+sdk_version: 4.44.0
+app_file: app.py
 pinned: false
-license: mit
 ---
 
 # YOLO Experiment
