@@ -21,20 +21,22 @@ Performance:
 - Optimized for real-time performance
 """
 
+import os
+# Set environment variables BEFORE importing other packages to prevent conflicts
+os.environ['YOLO_VERBOSE'] = 'False'
+os.environ['GRADIO_WATCH_DIRS'] = ''  # Disable hot-reloading
+
 import gradio as gr
 from ultralytics import YOLO
 import cv2
 import numpy as np
 from PIL import Image
-import os
 import threading
 import queue
 import time
 from collections import deque
 import torch
-
-# Suppress ultralytics verbose output
-os.environ['YOLO_VERBOSE'] = 'False'
+import spaces
 
 # Check for GPU availability
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -58,6 +60,7 @@ is_processing = False
 fps_list = deque(maxlen=20)  # Rolling average of last 20 frames
 last_process_time = time.time()
 
+@spaces.GPU
 def detect_objects(image, conf_threshold, iou_threshold):
     """
     Detect objects in an image using YOLOv8
@@ -89,7 +92,7 @@ def detect_objects(image, conf_threshold, iou_threshold):
     # annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
 
     return annotated_image
-
+@spaces.GPU
 def process_frame_thread(image, conf=0.25):
     """Thread worker to process frames with FPS tracking"""
     global latest_result, is_processing, fps_list, last_process_time
@@ -117,7 +120,7 @@ def process_frame_thread(image, conf=0.25):
     finally:
         with processing_lock:
             is_processing = False
-
+@spaces.GPU
 def detect_objects_webcam(image):
     """Threaded version for webcam streaming with frame skipping and FPS display"""
     global latest_result, is_processing
@@ -225,4 +228,5 @@ with gr.Blocks(title="YOLOv8 Object Detection") as demo:
     )
 
 # Launch the app
-demo.launch()
+# Disable hot-reloading to prevent Spaces version conflicts
+demo.launch(show_error=True)
