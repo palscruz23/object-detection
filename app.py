@@ -5,12 +5,37 @@ import os
 import numpy as np
 from PIL import Image
 
+st.set_page_config(
+        page_title="YOLO Experience",
+        page_icon=":eyes:",
+        layout="wide",
+        )
+
 st.title("YOLO Experience")
+
+# Apply CSS
+st.markdown("""
+    <style>
+        [data-testid="stImage"] {
+            width: 50% !important;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        [data-testid="stImage"] > img {
+            width: 100% !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 with st.sidebar:
     st.header("Settings")
-    model_choice = st.selectbox("Choose Model", ["yolo12n.pt", "yolov8n.pt"])
     application_mode = st.selectbox("Application", ["Object Detection", "Pose Recognition"])
+    if application_mode == "Object Detection":
+        model_choice = st.selectbox("Choose Model", ["yolo12n.pt", "yolov8n.pt"])
+    elif application_mode == "Pose Recognition":
+        model_choice = st.selectbox("Choose Model", ["yolo11n-pose.pt", "yolov8n-pose.pt"]) 
+
     confidence = st.slider("Confidence Threshold",
                               min_value = 0.0,
                               max_value = 1.0,
@@ -25,36 +50,28 @@ with st.sidebar:
 model = YOLO(model_choice)
 
 if application_mode == "Object Detection":
-    col1, col2 = st.columns(2)
-    with col1:
+    st.subheader("Detection Output")
+elif application_mode == "Pose Recognition":
+    st.subheader("Pose Recognition")
 
-        st.subheader("Object Detection Mode")
-        run = st.button("▶️ Start Detection", type="primary")
-        stop = st.button("⏹️ Stop Detection")
 
-        if run:
-            st.success("🔴 Detection Active")
+proc_frame = st.empty()
+cap = cv2.VideoCapture(0)
 
-            camera_image = st.camera_input("Take a picture")
-            if camera_image is not None:
-                # Auto-reload for continuous capture
-                st.rerun()
-    with col2:
-        if run:
-            if camera_image is not None:
-                img = Image.open(camera_image)
-                img_array = np.array(img)
-                results = model(source=img_array,
-                                        conf = confidence,
-                                        iou = iou, 
-                                        verbose=False,
-                                        stream=True
-                                        )
+while True:
+    ret, frame = cap.read()
 
-                result = results[0] # Get first results
-                img_box = result.plot() # Draw bounding box
-                img_box = cv2.cvtColor(img_box, cv2.COLOR_BGR2RGB) # Convert color from BGR to RGB
-                st.image(img_box, caption = "Object Detection", use_container_width=True)
+    if not ret:
+        break
 
-            
+    # orig_frame.image(frame, channels="BGR", caption="Original")
+    results = model(frame,
+                    conf = confidence,
+                    iou = iou, 
+                    verbose=False
+                    )
+    img_box = results[0].plot() # Draw bounding box
+    # img_box = cv2.cvtColor(img_box, cv2.COLOR_BGR2RGB) # Convert color from BGR to RGB
+    proc_frame.image(img_box, channels="BGR", caption="Processed", width="stretch")
 
+cap.release()
