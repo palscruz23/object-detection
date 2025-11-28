@@ -7,6 +7,17 @@ from PIL import Image
 import time
 from streamlit_tags import st_tags
 
+def hex2rgb(hex):
+    hex2num = {"0": 0, "1": 1, "2":2, "3": 3, "4": 4, "5":5, 
+            "6": 6, "7": 7, "8":8, "9": 9, "a": 10, "b":11, 
+            "c": 12, "d": 13, "e":14, "f": 15}
+    rgb = []
+    for i in range(1, len(hex)-1, 2):
+        h = hex2num[hex[i]]*16 + hex2num[hex[i+1]]
+        rgb.append(h)
+
+    return rgb[0], rgb[1], rgb[2]
+
 COCO_CLASSES = {
     0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane', 5: 'bus', 
     6: 'train', 7: 'truck', 8: 'boat', 9: 'traffic light', 10: 'fire hydrant', 
@@ -85,6 +96,9 @@ with st.sidebar:
             key = next(k for k, v in model.names.items() if v == input)
             classes.append(key)
 
+    shade = st.checkbox("Segment Fill")
+    if shade:
+        color = st.color_picker("Select color", "#000000")
 
 if application_mode == "Object Detection":
     st.subheader("Detection Output")
@@ -120,7 +134,13 @@ while True:
         fps_list.pop(0)
     avg_fps = sum(fps_list) / len(fps_list)
 
-    img_box = results[0].plot(boxes=True, masks=True) # Draw bounding box
+    if application_mode == "Object Detection":
+        img_box = results[0].plot(boxes=True, masks=True) # Draw bounding box
+    elif application_mode == "Pose Recognition":
+        img_box = results[0].plot(boxes=True, masks=True) # Draw bounding box
+    elif application_mode == "Instance Segmentation":
+        img_box = results[0].plot(boxes=False, masks=True) # Draw bounding box
+    
     # img_box = frame
     cv2.putText(img_box, f'FPS: "{avg_fps:.1f}', (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     img_box = cv2.cvtColor(img_box, cv2.COLOR_BGR2RGB) # Convert color from BGR to RGB
@@ -147,14 +167,14 @@ while True:
     #         img_box[edges_in_polygon > 0] = [255, 255, 0]
 
     # Mask outline
-    if results[0].masks is not None:
+    if results[0].masks is not None and shade:
         for mask in results[0].masks:
             points = mask.xy[0].astype(np.int32)
             
             # Draw only the contour (outline)
-            color = (255, 0, 0)  # Green outline
+            # color = (255, 0, 0)  # Green outline
             cv2.polylines(img_box, [points], isClosed=True, color=color, thickness=10)
-            cv2.fillPoly(img_box, [points], color=(0, 0, 0))
+            cv2.fillPoly(img_box, [points], color=color)
     # img_box = cv2.cvtColor(img_box, cv2.COLOR_BGR2RGB)
 
 
