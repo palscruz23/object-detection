@@ -59,21 +59,21 @@ with st.sidebar:
     elif application_mode == "Instance Segmentation":
         model_choice = st.selectbox("Choose Model", ["yolo11n-seg.pt", "yolov8n-seg.pt"])  
     model = YOLO(model_choice)
-
+    classes_input = st.multiselect("Select Classes", 
+                                   options=list(model.names.values()), 
+                                   default=None,
+                                   )  # Default to all classes
     confidence = st.slider("Confidence Threshold",
                               min_value = 0.0,
                               max_value = 1.0,
                               value = 0.5,
                               step = 0.05)
-    iou = st.slider("Intersect Over Union (IoU) Threshold",
-                              min_value = 0.0,
-                              max_value = 1.0,
-                              value = 0.5,
-                              step = 0.05)
-    classes_input = st.multiselect("Select Classes", 
-                                   options=list(model.names.values()), 
-                                   default=None,
-                                   )  # Default to all classes
+    # iou = st.slider("Intersect Over Union (IoU) Threshold",
+    #                           min_value = 0.0,
+    #                           max_value = 1.0,
+    #                           value = 0.5,
+    #                           step = 0.05)
+
     classes = []
     if classes_input == []:
         all_class = list(range(len(model.names)))
@@ -107,7 +107,7 @@ while True:
     # orig_frame.image(frame, channels="BGR", caption="Original")
     results = model(frame,
                     conf = confidence,
-                    iou = iou, 
+                    # iou = iou, 
                     verbose=False,
                     classes=classes
                     )
