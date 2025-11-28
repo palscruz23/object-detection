@@ -95,10 +95,25 @@ with st.sidebar:
         for input in classes_input:
             key = next(k for k, v in model.names.items() if v == input)
             classes.append(key)
-
-    shade = st.checkbox("Segment Fill")
-    if shade:
-        color = st.color_picker("Select color", "#000000")
+    if application_mode == "Instance Segmentation":
+        shade = st.checkbox("Segment Fill")
+        if shade is not None and shade:
+            color_segment_choice = st.color_picker("Select segment color", "#000000")
+            color_segment = hex2rgb(color_segment_choice)
+            alpha = st.slider("Opacity",
+                            min_value = 0.0,
+                            max_value = 1.0,
+                            value = 0.5,
+                            step = 0.05)
+        contour = st.checkbox("Contour")
+        if contour is not None and contour:
+            color_contour_choice = st.color_picker("Select contour color", "#000000")
+            color_contour = hex2rgb(color_contour_choice)
+            thickness = st.slider("Thickness",
+                            min_value = 0,
+                            max_value = 10,
+                            value = 5,
+                            step = 1)
 
 if application_mode == "Object Detection":
     st.subheader("Detection Output")
@@ -140,7 +155,8 @@ while True:
         img_box = results[0].plot(boxes=True, masks=True) # Draw bounding box
     elif application_mode == "Instance Segmentation":
         img_box = results[0].plot(boxes=False, masks=True) # Draw bounding box
-    
+        img = cv2.cvtColor(img_box, cv2.COLOR_BGR2RGB) # Convert color from BGR to RGB
+
     # img_box = frame
     cv2.putText(img_box, f'FPS: "{avg_fps:.1f}', (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     img_box = cv2.cvtColor(img_box, cv2.COLOR_BGR2RGB) # Convert color from BGR to RGB
@@ -167,15 +183,14 @@ while True:
     #         img_box[edges_in_polygon > 0] = [255, 255, 0]
 
     # Mask outline
-    if results[0].masks is not None and shade:
+    if results[0].masks is not None and (shade or contour):
         for mask in results[0].masks:
             points = mask.xy[0].astype(np.int32)
-            
-            # Draw only the contour (outline)
-            # color = (255, 0, 0)  # Green outline
-            cv2.polylines(img_box, [points], isClosed=True, color=color, thickness=10)
-            cv2.fillPoly(img_box, [points], color=color)
-    # img_box = cv2.cvtColor(img_box, cv2.COLOR_BGR2RGB)
+            if shade is not None and shade:
+                cv2.fillPoly(img_box, [points], color=color_segment)
+                img_box = cv2.addWeighted(img_box, alpha, img, 1-alpha,0)
+            if contour is not None and contour:
+                cv2.polylines(img_box, [points], isClosed=True, color=color_contour, thickness=thickness)
 
 
     proc_frame.image(img_box, caption="Processed Frame", width="stretch")
