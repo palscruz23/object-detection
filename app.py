@@ -170,6 +170,7 @@
 import gradio as gr
 from ultralytics import YOLO
 import cv2
+import spaces
 
 model = YOLO("yolo11n.pt")
 
