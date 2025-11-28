@@ -70,18 +70,18 @@ with st.sidebar:
                               max_value = 1.0,
                               value = 0.5,
                               step = 0.05)
-    classes_input = st.multiselect("Select Classes", options=list(model.names.values()), default=None)  # Default to class 0 (person)
-    classes_tag = st_tags(
-                    label="Select Classes",
-                    text="Enter class",
-                    value=[],
-                    suggestions=list(model.names.values()), 
-                    maxtags=10)  # Default to class 0 (person)
-
-    if classes_input is None:
-        all_class = list(COCO_CLASSES.keys())
+    classes_input = st.multiselect("Select Classes", 
+                                   options=list(model.names.values()), 
+                                   default=None,
+                                   )  # Default to all classes
+    classes = []
+    if classes_input == []:
+        all_class = list(range(len(model.names)))
         classes = all_class
-        print(classes)
+    else:
+        for input in classes_input:
+            key = next(k for k, v in model.names.items() if v == input)
+            classes.append(key)
 
 
 if application_mode == "Object Detection":
@@ -109,7 +109,7 @@ while True:
                     conf = confidence,
                     iou = iou, 
                     verbose=False,
-                    classes=[0]
+                    classes=classes
                     )
     
     fps = 1 / (time.time() - start_time)
