@@ -167,48 +167,32 @@
 
 
 
-
-import streamlit as st
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase, RTCConfiguration
+import gradio as gr
 from ultralytics import YOLO
-import av
+import cv2
 
-class YOLOVideoTransformer(VideoTransformerBase):
-    def __init__(self):
-        self.model = YOLO("yolo11n.pt")
-        self.conf_threshold = 0.25
+model = YOLO("yolo11n.pt")
+
+def predict_webcam(image, confidence):
+    """Real-time webcam detection"""
+    if image is None:
+        return None
     
-    def recv(self, frame):
-        img = frame.to_ndarray(format="bgr24")
-        
-        # Run YOLO detection
-        results = self.model.predict(img, conf=self.conf_threshold, verbose=False)
-        
-        # Get annotated frame
-        annotated = results[0].plot()
-        
-        return av.VideoFrame.from_ndarray(annotated, format="bgr24")
+    results = model.predict(image, conf=confidence, verbose=False)
+    annotated = results[0].plot()
+    
+    return annotated
 
-st.title("🎯 YOLO Real-Time Detection")
-
-# Sidebar settings
-st.sidebar.title("Settings")
-confidence = st.sidebar.slider("Confidence Threshold", 0.0, 1.0, 0.25, 0.05)
-
-# RTC Configuration for STUN server
-RTC_CONFIGURATION = RTCConfiguration(
-    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+# Create interface with streaming
+demo = gr.Interface(
+    fn=predict_webcam,
+    inputs=[
+        gr.Image(sources=["webcam"], streaming=True, type="numpy"),
+        gr.Slider(0.0, 1.0, 0.25, label="Confidence")
+    ],
+    outputs=gr.Image(type="numpy"),
+    live=True,  # Enable real-time processing
+    title="🎯 YOLO Real-Time Detection"
 )
 
-# WebRTC streamer
-ctx = webrtc_streamer(
-    key="yolo-detection",
-    video_transformer_factory=YOLOVideoTransformer,
-    rtc_configuration=RTC_CONFIGURATION,
-    media_stream_constraints={"video": True, "audio": False},
-    async_transform=True,
-)
-
-# Update confidence threshold
-if ctx.video_transformer:
-    ctx.video_transformer.conf_threshold = confidence
+demo.launch()
