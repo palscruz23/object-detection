@@ -1,11 +1,10 @@
 import streamlit as st
-from ultralytics import YOLO, SAM
+from ultralytics import YOLO
 import cv2
 import os
 import numpy as np
 from PIL import Image
 import time
-from streamlit_tags import st_tags
 
 def hex2rgb(hex):
     hex2num = {"0": 0, "1": 1, "2":2, "3": 3, "4": 4, "5":5, 
