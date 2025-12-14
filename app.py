@@ -127,7 +127,7 @@ elif application_mode == "Instance Segmentation":
 
 proc_frame = st.empty()
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1) # 0 - laptop webcam, 1 - external webcam
 
 fps_list = []
 

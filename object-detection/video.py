@@ -14,7 +14,7 @@ if not os.path.exists('output/video'):
     os.mkdir('output/video')
 
 # 2. Open the input video
-input_path = "data/mining.mp4"
+input_path = "data/raw video.mp4"
 output_path = "output/video/output_video.mp4"
 cap = cv2.VideoCapture(input_path)
 

@@ -43,7 +43,7 @@ frame_queue = queue.Queue(maxsize=2)  # Keep only 2 frames
 
 def capture_frames(url, frame_queue):
     """Separate thread to capture frames"""
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Minimize buffer
     
     while True:
